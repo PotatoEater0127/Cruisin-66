@@ -7,7 +7,7 @@ import {
   TextInput,
   ScrollView,
   Button,
-  ImageBackground,
+  ImageBackground
 } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import ImagePicker from "react-native-image-picker";
@@ -28,12 +28,13 @@ export default class CreateStop extends React.Component {
       name: null,
       imageSource: null,
       longitude: null,
-      latitude: null,
+      latitude: null
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handlePhotoUpload = this.handlePhotoUpload.bind(this);
-
+    this.handleAutoCompletePress = this.handleAutoCompletePress.bind(this);
+    this.fetchAndSaveAllGooglePhotos = this.fetchAndSaveAllGooglePhotos.bind(this);
   }
 
   componentDidMount() {
@@ -50,16 +51,37 @@ export default class CreateStop extends React.Component {
         description: this.state.description,
         address: this.state.address,
         userId: 8, // TODO: replace hardcoded
-        StopPhotos: [{ url: '', description: '' }], // TODO: desciption
+        StopPhotos: [{ url: "", description: "" }], // TODO: desciption
         latitude: this.state.latitude,
-        longitude: this.state.longitude,
+        longitude: this.state.longitude
       },
       itineraryId: this.state.itineraryId
     };
 
     this.createStop(postData)
-      .then(() => this.props.navigation.navigate('Stops', {itineraryId: this.state.itineraryId}))
+      .then(() =>
+        this.props.navigation.navigate("Stops", {
+          itineraryId: this.state.itineraryId
+        })
+      )
       .catch(err => console.log(err));
+  }
+
+  handleAutoCompletePress(data, details) {
+    console.log(data, details);
+    const fullInfo = data.description;
+    const { lat, lng } = details.geometry.location;
+
+    const { photos } = details;
+    const photorefs = photos ? photos.slice(0, 4).map(photo => photo.photo_reference) : [];
+    this.fetchAndSaveAllGooglePhotos(photorefs);
+
+    this.setState({
+      name: getName(fullInfo),
+      address: getAddress(fullInfo),
+      longitude: lng,
+      latitude: lat
+    });
   }
 
   handlePhotoUpload() {
@@ -93,28 +115,62 @@ export default class CreateStop extends React.Component {
     return axios.post(url, { imageUri });
   }
 
+  /**
+   * Get photos from google place photo api and then save them into cloudinary.
+   * @param {array} photosReferences - An array of photoreferences that can be used for fetching google place photos
+   */
+  fetchAndSaveAllGooglePhotos(photosReferences = []) {
+    if (photosReferences.length == 0) {
+      return;
+    }
+    const promises = photosReferences.map(ref =>
+      this.fetchAndSaveOneGooglePhoto(ref)
+    );
+    return axios
+      .all(promises)
+      .then(axios.spread((...responses) => responses))
+      .catch(err => console.log(err));
+  }
+
+  /**
+   * Get one photo from google place photo api and then save it into cloudinary.
+   * @param {array} photosReferences - An photoreference sent back by google map autocomplete.
+   *                                   It can be used for fetching a google place photo.
+   */
+  fetchAndSaveOneGooglePhoto(photoreference) {
+    const url = "http://localhost:4000/google/photo";
+    console.log(photoreference);
+    return axios.post(url, { photoreference });
+  }
+
   createStop(postData) {
     const url = "http://localhost:3000/stop";
 
     return this.uploadToCloudinary(this.state.imageSource.uri)
-      .then(res => postData.stop.StopPhotos[0].url = res.data)
+      .then(res => (postData.stop.StopPhotos[0].url = res.data))
       .then(() => axios.post(url, postData));
   }
 
   render() {
     return (
-      <ImageBackground style={styles.background} source={{uri: 'https://i.pinimg.com/564x/bf/a8/fa/bfa8faf7d84fe084ef38ff5667656d85.jpg'}}>
+      <ImageBackground
+        style={styles.background}
+        source={{
+          uri:
+            "https://i.pinimg.com/564x/bf/a8/fa/bfa8faf7d84fe084ef38ff5667656d85.jpg"
+        }}
+      >
         <ScrollView>
           <View style={styles.container}>
             <GooglePlacesAutocomplete
               styles={{
                 poweredContainer: {
-                  width:0,
-                  height:0,
+                  width: 0,
+                  height: 0
                 },
                 powered: {
-                  width:0,
-                  height:0
+                  width: 0,
+                  height: 0
                 }
               }}
               placeholder="Search"
@@ -122,20 +178,9 @@ export default class CreateStop extends React.Component {
               autoFocus={false}
               returnKeyType={"search"} // Can be left out for default return key https://facebook.github.io/react-native/docs/textinput.html#returnkeytype
               listViewDisplayed="auto" // true/false/undefined
-              fetchDetails={true}
+              fetchDetails={true}  // 'details' in onPress() callback is provided when fetchDetails = true
               renderDescription={row => row.description} // custom description render
-              onPress={(data, details = null) => {
-                // 'details' is provided when fetchDetails = true
-                console.log(data, details);
-                const fullInfo = data.description;
-                const {lat, lng} = details.geometry.location;
-                this.setState({
-                  name: getName(fullInfo),
-                  address: getAddress(fullInfo),
-                  longitude: lng,
-                  latitude: lat,
-                });
-              }}
+              onPress={(data, details = null) => { this.handleAutoCompletePress(data, details) }}
               getDefaultValue={() => ""}
               query={{
                 // available options: https://developers.google.com/places/web-service/autocomplete
@@ -215,7 +260,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     borderColor: "#000",
-    height: "100%",
+    height: "100%"
   },
 
   title: {
@@ -245,10 +290,9 @@ const styles = StyleSheet.create({
     width: 200
   },
   background: {
-    height: '100%',
-    width: '100%',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    resizeMode: 'stretch',
-    
+    height: "100%",
+    width: "100%",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    resizeMode: "stretch"
   }
 });
