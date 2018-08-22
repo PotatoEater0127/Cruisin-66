@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   Button,
+  ImageBackground,
 } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import ImagePicker from "react-native-image-picker";
@@ -30,6 +31,8 @@ export default class CreateStop extends React.Component {
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handlePhotoUpload = this.handlePhotoUpload.bind(this);
+
+    console.log('POOOP');
   }
 
   componentDidMount() {
@@ -97,76 +100,88 @@ export default class CreateStop extends React.Component {
 
   render() {
     return (
-      <ScrollView>
-        <View style={styles.container}>
-          <GooglePlacesAutocomplete
-            placeholder="Search"
-            minLength={2} // minimum length of text to search
-            autoFocus={false}
-            returnKeyType={"search"} // Can be left out for default return key https://facebook.github.io/react-native/docs/textinput.html#returnkeytype
-            listViewDisplayed="auto" // true/false/undefined
-            fetchDetails={true}
-            renderDescription={row => row.description} // custom description render
-            onPress={(data, details = null) => {
-              // 'details' is provided when fetchDetails = true
-              console.log(data, details);
-              const fullInfo = data.description;
-              this.setState({
-                name: getName(fullInfo),
-                address: getAddress(fullInfo)
-              });
-            }}
-            getDefaultValue={() => ""}
-            query={{
-              // available options: https://developers.google.com/places/web-service/autocomplete
-              key: "AIzaSyBHNIOJemEkEyO4gI_hask8BO6bJno9Q58",
-              language: "en", // language of the results
-              types: "" // default: 'geocode'
-            }}
-            styles={{
-              textInputContainer: {
-                width: "100%"
-              },
-              description: {
-                fontWeight: "bold"
-              },
-              predefinedPlacesDescription: {
-                color: "#1faadb"
+      <ImageBackground style={styles.background} source={{uri: 'https://i.pinimg.com/564x/bf/a8/fa/bfa8faf7d84fe084ef38ff5667656d85.jpg'}}>
+        <ScrollView>
+          <View style={styles.container}>
+            <GooglePlacesAutocomplete
+              styles={{
+                poweredContainer: {
+                  width:0,
+                  height:0,
+                },
+                powered: {
+                  width:0,
+                  height:0
+                }
+              }}
+              placeholder="Search"
+              minLength={2} // minimum length of text to search
+              autoFocus={false}
+              returnKeyType={"search"} // Can be left out for default return key https://facebook.github.io/react-native/docs/textinput.html#returnkeytype
+              listViewDisplayed="auto" // true/false/undefined
+              fetchDetails={true}
+              renderDescription={row => row.description} // custom description render
+              onPress={(data, details = null) => {
+                // 'details' is provided when fetchDetails = true
+                console.log(data, details);
+                const fullInfo = data.description;
+                this.setState({
+                  name: getName(fullInfo),
+                  address: getAddress(fullInfo)
+                });
+              }}
+              getDefaultValue={() => ""}
+              query={{
+                // available options: https://developers.google.com/places/web-service/autocomplete
+                key: "AIzaSyBHNIOJemEkEyO4gI_hask8BO6bJno9Q58",
+                language: "en", // language of the results
+                types: "" // default: 'geocode'
+              }}
+              styles={{
+                textInputContainer: {
+                  width: "100%"
+                },
+                description: {
+                  fontWeight: "bold"
+                },
+                predefinedPlacesDescription: {
+                  color: "#1faadb"
+                }
+              }}
+              nearbyPlacesAPI="GooglePlacesSearch" // Which API to use: GoogleReverseGeocoding or GooglePlacesSearch
+              GoogleReverseGeocodingQuery={
+                {
+                  // available options for GoogleReverseGeocoding API : https://developers.google.com/maps/documentation/geocoding/intro
+                }
               }
-            }}
-            nearbyPlacesAPI="GooglePlacesSearch" // Which API to use: GoogleReverseGeocoding or GooglePlacesSearch
-            GoogleReverseGeocodingQuery={
-              {
-                // available options for GoogleReverseGeocoding API : https://developers.google.com/maps/documentation/geocoding/intro
-              }
-            }
-            GooglePlacesSearchQuery={{
-              // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
-              rankby: "distance",
-              types: "food"
-            }}
-            filterReverseGeocodingByTypes={[
-              "locality",
-              "administrative_area_level_3"
-            ]} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
-            debounce={600} // debounce the requests in ms. Set to 0 to remove debounce. By default 0ms.
-          />
-          <Text style={styles.title}> Description: </Text>
-          <TextInput
-            editable={true}
-            multiline={true}
-            numberOfLines={6}
-            maxLength={100}
-            placeholder={"What so special here?"}
-            style={styles.inputStyle}
-            onChangeText={description => this.setState({ description })}
-            value={this.state.description}
-          />
-          <Button title="Add Photo" onPress={this.handlePhotoUpload} />
-          <Image style={styles.photo} source={this.state.imageSource} />
-          <Button title="Create" onPress={this.handleSubmit} />
-        </View>
-      </ScrollView>
+              GooglePlacesSearchQuery={{
+                // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
+                rankby: "distance",
+                types: "food"
+              }}
+              filterReverseGeocodingByTypes={[
+                "locality",
+                "administrative_area_level_3"
+              ]} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
+              debounce={600} // debounce the requests in ms. Set to 0 to remove debounce. By default 0ms.
+            />
+            <Text style={styles.title}> Description: </Text>
+            <TextInput
+              editable={true}
+              multiline={true}
+              numberOfLines={6}
+              maxLength={100}
+              placeholder={"What so special here?"}
+              style={styles.inputStyle}
+              onChangeText={description => this.setState({ description })}
+              value={this.state.description}
+            />
+            <Button title="Add Photo" onPress={this.handlePhotoUpload} />
+            <Image style={styles.photo} source={this.state.imageSource} />
+            <Button title="Create" onPress={this.handleSubmit} />
+          </View>
+        </ScrollView>
+      </ImageBackground>
     );
   }
 }
@@ -194,7 +209,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     borderColor: "#000",
-    height: "100%"
+    height: "100%",
   },
 
   title: {
@@ -222,5 +237,12 @@ const styles = StyleSheet.create({
   photo: {
     height: 200,
     width: 200
+  },
+  background: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    resizeMode: 'stretch',
+    
   }
 });
