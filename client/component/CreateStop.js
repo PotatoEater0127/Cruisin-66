@@ -27,12 +27,13 @@ export default class CreateStop extends React.Component {
       description: null,
       name: null,
       imageSource: null,
+      longitude: null,
+      latitude: null,
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handlePhotoUpload = this.handlePhotoUpload.bind(this);
 
-    console.log('POOOP');
   }
 
   componentDidMount() {
@@ -49,7 +50,9 @@ export default class CreateStop extends React.Component {
         description: this.state.description,
         address: this.state.address,
         userId: 8, // TODO: replace hardcoded
-        StopPhotos: [{ url: '', description: '' }] // TODO: desciption
+        StopPhotos: [{ url: '', description: '' }], // TODO: desciption
+        latitude: this.state.latitude,
+        longitude: this.state.longitude,
       },
       itineraryId: this.state.itineraryId
     };
@@ -125,9 +128,12 @@ export default class CreateStop extends React.Component {
                 // 'details' is provided when fetchDetails = true
                 console.log(data, details);
                 const fullInfo = data.description;
+                const {lat, lng} = details.geometry.location;
                 this.setState({
                   name: getName(fullInfo),
-                  address: getAddress(fullInfo)
+                  address: getAddress(fullInfo),
+                  longitude: lng,
+                  latitude: lat,
                 });
               }}
               getDefaultValue={() => ""}
