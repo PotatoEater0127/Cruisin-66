@@ -9,6 +9,7 @@ import {
   Button,
   ImageBackground
 } from "react-native";
+
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import ImagePicker from "react-native-image-picker";
 
@@ -45,26 +46,27 @@ export default class CreateStop extends React.Component {
   }
 
   handleSubmit() {
-    const postData = {
-      stop: {
-        name: this.state.name,
-        description: this.state.description,
-        address: this.state.address,
-        userId: 8, // TODO: replace hardcoded
-        StopPhotos: [{ url: "", description: "" }], // TODO: desciption
-        latitude: this.state.latitude,
-        longitude: this.state.longitude
-      },
-      itineraryId: this.state.itineraryId
-    };
+    console.log(this.state);
+    // const postData = {
+    //   stop: {
+    //     name: this.state.name,
+    //     description: this.state.description,
+    //     address: this.state.address,
+    //     userId: 8, // TODO: replace hardcoded
+    //     StopPhotos: [{ url: "", description: "" }], // TODO: desciption
+    //     latitude: this.state.latitude,
+    //     longitude: this.state.longitude
+    //   },
+    //   itineraryId: this.state.itineraryId
+    // };
 
-    this.createStop(postData)
-      .then(() =>
-        this.props.navigation.navigate("Stops", {
-          itineraryId: this.state.itineraryId
-        })
-      )
-      .catch(err => console.log(err));
+    // this.createStop(postData)
+    //   .then(() =>
+    //     this.props.navigation.navigate("Stops", {
+    //       itineraryId: this.state.itineraryId
+    //     })
+    //   )
+    //   .catch(err => console.log(err));
   }
 
   handleAutoCompletePress(data, details) {
@@ -74,14 +76,9 @@ export default class CreateStop extends React.Component {
 
     const { photos } = details;
     const photorefs = photos ? photos.slice(0, 4).map(photo => photo.photo_reference) : [];
-    this.fetchAndSaveAllGooglePhotos(photorefs);
+    this.fetchAndSaveAllGooglePhotos(photorefs)
+        .then((imageUrls) => this.setState({photos: imageUrls}));
 
-    this.setState({
-      name: getName(fullInfo),
-      address: getAddress(fullInfo),
-      longitude: lng,
-      latitude: lat
-    });
   }
 
   handlePhotoUpload() {
@@ -128,8 +125,7 @@ export default class CreateStop extends React.Component {
     );
     return axios
       .all(promises)
-      .then(axios.spread((...responses) => responses))
-      .catch(err => console.log(err));
+      .then(axios.spread((...responses) => responses.map((res) => res.data)));
   }
 
   /**
@@ -227,8 +223,10 @@ export default class CreateStop extends React.Component {
               onChangeText={description => this.setState({ description })}
               value={this.state.description}
             />
+            {this.state.photos.map((url) => {
+              return (<Image style={styles.photo} source={{uri: url}} />)
+            })}
             <Button title="Add Photo" onPress={this.handlePhotoUpload} />
-            <Image style={styles.photo} source={this.state.imageSource} />
             <Button title="Create" onPress={this.handleSubmit} />
           </View>
         </ScrollView>
