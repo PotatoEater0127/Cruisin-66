@@ -52,7 +52,8 @@ let createItinerary = (newItineray, callback) => {
     name: newItineray.name,
     description: newItineray.description,
     UserId: newItineray.UserId,
-    CategoryId: newItineray.CategoryId
+    CategoryId: newItineray.CategoryId,
+    photoUrl: newItineray.photoUrl,
   })
   .then((createdItinerary) => {
     console.log(createdItinerary);
