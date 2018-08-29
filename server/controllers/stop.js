@@ -11,7 +11,7 @@ let getAllStops = (query, callback) => {
         id: id
       }
     }, db.StopPhoto],
-    order: [['updatedAt', 'DESC']]
+    order: [['order', 'ASC']]
   })
   .then((stops) => {
     console.log(stops);
@@ -68,9 +68,23 @@ const getStopByCoordinate = (coordinate, callback) => {
          .catch((err) => callback(err, null));
 };
 
+const updateStopsOrder = (idsByOrder, callback) => {
+  console.log('IDS_BY_ORDER: ', idsByOrder);
+  try {
+    idsByOrder.forEach((id, index) => {
+      const order = index + 1;
+      db.Stop.update({ order }, { where: { id } });
+    });
+    callback(null, 'update successfully');
+  } catch(err) {
+    callback(err, null);
+  }
+};
+
 
 
 module.exports.createStop = createStop;
 module.exports.getAllStops = getAllStops;
 module.exports.getStopById = getStopById;
 module.exports.getStopByCoordinate = getStopByCoordinate;
+module.exports.updateStopsOrder = updateStopsOrder;
