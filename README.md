@@ -2,6 +2,8 @@
 
 Cruisin' 66 is a mobile app that lets you find and create road trip itineraries. 
 
+<img src="https://github.com/PotatoEater0127/Cruisin-66/blob/master/client/component/images/demo.gif" />
+
 ## Team
 
 - **Product Owner**: [Henry Han](https://github.com/PotatoEater0127)
